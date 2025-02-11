@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import AuthRoutes from '../modules/auth/routes';
+import TicketRoutes from '../modules/tickets/routes';
 
 const router = Router();
 type TRouteModule = {
@@ -10,6 +11,10 @@ const moduleRoutes: TRouteModule[] = [
   {
     path: '/auth',
     route: AuthRoutes,
+  },
+  {
+    path: '/tickets',
+    route: TicketRoutes,
   },
 ];
 

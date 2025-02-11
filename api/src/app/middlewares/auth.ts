@@ -19,7 +19,7 @@ const auth = (...roles: string[]) => {
       }
       const verifiedUser = await jwtHelpers.verifyToken(
         token,
-        config.jwt__access_secret as string,
+        config.jwt.access_secret as string,
       );
 
       const user = await prisma.user.findUniqueOrThrow({
@@ -27,6 +27,13 @@ const auth = (...roles: string[]) => {
           id: verifiedUser.id,
         },
       });
+
+      if (user.status !== 'ACTIVE') {
+        throw new AppError(
+          httpStatus.UNAUTHORIZED,
+          `Your account is ${user?.status?.toLowerCase()}`,
+        );
+      }
 
       req.user = user;
       if (roles.length && !roles.includes(verifiedUser.role)) {

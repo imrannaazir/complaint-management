@@ -1,0 +1,18 @@
+model Ticket {
+    id          String        @id @unique @default(uuid())
+    subject     String
+    description String
+    status      TicketStatus? @default(OPEN)
+    customerId  String
+    customer    User          @relation(fields: [customerId], references: [id])
+    executiveId String
+    executive   User          @relation("executive", fields: [executiveId], references: [id])
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+}
+
+enum TicketStatus {
+    OPEN
+    RESOLVED
+    CLOSED
+}

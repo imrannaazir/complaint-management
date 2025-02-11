@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 type TUser = {
@@ -10,7 +10,7 @@ type TUser = {
 declare global {
   namespace Express {
     interface Request {
-      user: TUser | null;
+      user: User | null;
     }
   }
 }

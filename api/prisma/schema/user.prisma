@@ -1,10 +1,13 @@
 model User {
-    id        String   @id @unique @default(uuid())
-    fullName  String
-    email     String   @unique
-    password  String
-    role      Role
-    status    Status
+    id              String   @id @unique @default(uuid())
+    fullName        String
+    email           String   @unique
+    password        String
+    role            Role
+    tickets         Ticket[]
+    assignedTickets Ticket[] @relation("executive")
+
+    status    Status?  @default(PENDING)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 }
