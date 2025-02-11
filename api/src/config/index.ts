@@ -13,12 +13,19 @@ export default {
   port: process.env.PORT,
   database_url: process.env.DATABASE_URL,
   bcrypt_salt_rounds: process.env.SALT_ROUND,
-  jwt__access_secret: process.env.JWT_ACCESS_SECRET,
-  jwt__access_expire_in: process.env.JWT_ACCESS_EXPIRE_IN,
-  jwt__refresh_secret: process.env.JWT_REFRESH_SECRET,
-  jwt__refresh_expire_in: process.env.JWT_REFRESH_EXPIRE_IN,
-
   client_origin: process.env.CLIENT_ORIGIN,
+  jwt: {
+    access_secret: process.env.JWT_ACCESS_SECRET,
+    access_expire_in: process.env.JWT_ACCESS_EXPIRE_IN,
+    verify_secret: process.env.JWT_VERIFY_SECRET,
+    verify_expire_in: process.env.JWT_VERIFY_EXPIRE_IN,
+    refresh_secret: process.env.JWT_REFRESH_SECRET,
+    refresh_expire_in: process.env.JWT_REFRESH_EXPIRE_IN,
+  },
+  node_mailer: {
+    email_app_password: process.env.EMAIL_APP_PASSWORD,
+    my_email_address: process.env.MY_EMAIL_ADDRESS,
+  },
   credential: {
     admin: {
       email: process.env.ADMIN_EMAIL,
