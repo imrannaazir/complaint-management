@@ -8,8 +8,13 @@ import sendEmail, {
   getValidateMailContent,
   TEmailPayload,
 } from '../../../shared/send-mail';
-import { TJwtPayload, TRegisterPayload } from './types';
-import { hashPassword } from './utils';
+import {
+  TJwtPayload,
+  TLoginPayload,
+  TLoginReturn,
+  TRegisterPayload,
+} from './types';
+import { comparePassword, hashPassword } from './utils';
 
 const registerUser = async (
   payload: TRegisterPayload,
@@ -133,10 +138,115 @@ const verifyAccount = async (token: string): Promise<null> => {
   return null;
 };
 
+const loginUser = async (payload: TLoginPayload): Promise<TLoginReturn> => {
+  const isUserExist = await prisma.user.findUniqueOrThrow({
+    where: {
+      email: payload.email,
+    },
+    select: {
+      password: true,
+      email: true,
+      fullName: true,
+      role: true,
+      status: true,
+      id: true,
+    },
+  });
+
+  const isPasswordMatched = await comparePassword(
+    payload.password,
+    isUserExist?.password,
+  );
+  if (!isPasswordMatched) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      'Invalid one or more credentials.',
+    );
+  }
+
+  if (
+    isUserExist?.status === Status.PENDING ||
+    isUserExist?.status === Status.BLOCKED
+  ) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      `Your account is ${String(isUserExist?.status).toLowerCase()}.`,
+    );
+  }
+
+  const jwtPayload: TJwtPayload = {
+    email: isUserExist?.email,
+    fullName: isUserExist?.fullName,
+    id: isUserExist?.id,
+    role: isUserExist?.role,
+  };
+
+  const accessToken = jwtHelpers.generateToken(
+    jwtPayload,
+    config.jwt.access_secret!,
+    config.jwt.access_expire_in!,
+  );
+  const refreshToken = jwtHelpers.generateToken(
+    jwtPayload,
+    config?.jwt.refresh_secret!,
+    config?.jwt.refresh_expire_in!,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+  };
+};
+
+const refreshAccessToken = async (token: string): Promise<TLoginReturn> => {
+  const isTokenValid = await jwtHelpers.verifyToken(
+    token,
+    config.jwt.refresh_secret!,
+  );
+  if (!isTokenValid) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized access.');
+  }
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: {
+      id: isTokenValid?.id,
+    },
+  });
+
+  if (user?.status !== Status.ACTIVE) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      `Your account is ${String(user.status).toLowerCase()}.`,
+    );
+  }
+
+  const jwtPayload: TJwtPayload = {
+    fullName: user?.fullName,
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  };
+
+  const accessToken = jwtHelpers.generateToken(
+    jwtPayload,
+    config.jwt.access_secret!,
+    config.jwt.access_expire_in!,
+  );
+  const refreshToken = jwtHelpers.generateToken(
+    jwtPayload,
+    config.jwt.refresh_secret!,
+    config.jwt.refresh_expire_in!,
+  );
+
+  return { accessToken, refreshToken };
+};
+
 const AuthServices = {
   registerUser,
   resendVerificationEmail,
   verifyAccount,
+  loginUser,
+  refreshAccessToken,
 };
 
 export default AuthServices;

@@ -18,10 +18,24 @@ const verifyAccountValidator = z.object({
   }),
 });
 
+const logoutValidator = z.object({
+  body: z.object({
+    email: z.string(),
+    password: z.string(),
+  }),
+});
+const refreshAccessTokenValidator = z.object({
+  cookies: z.object({
+    refreshToken: z.string(),
+  }),
+});
+
 const AuthValidators = {
   registerUserValidator,
   resendVerificationEmailValidator,
   verifyAccountValidator,
+  logoutValidator,
+  refreshAccessTokenValidator,
 };
 
 export default AuthValidators;

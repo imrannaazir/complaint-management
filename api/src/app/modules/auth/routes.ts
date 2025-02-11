@@ -23,5 +23,17 @@ router.post(
   AuthControllers.verifyAccount,
 );
 
+router.post(
+  '/login',
+  validateRequest(AuthValidators.logoutValidator),
+  AuthControllers.loginUser,
+);
+
+router.post(
+  '/refresh-access-token',
+  validateRequest(AuthValidators.refreshAccessTokenValidator),
+  AuthControllers.refreshAccessToken,
+);
+router.post('/logout', AuthControllers.logoutUser);
 const AuthRoutes = router;
 export default AuthRoutes;
